@@ -18,9 +18,9 @@ var col2 = 'blue';
 var SCORE = 0;
 
 var t1 = new Wedge(0, 90, col1, 200);
-var t2 = new Wedge(90, 180, col2, 260);
-var t3 = new Wedge(180, 270, col1, 320);
-var t4 = new Wedge(270, 360, col2, 380);
+var t2 = new Wedge(90, 180, col2, 240);
+var t3 = new Wedge(180, 270, col1, 280);
+var t4 = new Wedge(270, 360, col2, 320);
 var wedges = [t1, t2, t3, t4];
 
 var catcher = {
@@ -99,6 +99,7 @@ function draw_score() {
     ctx.font = '48px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline= 'middle';
+    ctx.fillStyle = 'white';
     ctx.fillText(SCORE, 0, 0);
     ctx.restore();
 }
@@ -130,7 +131,7 @@ function draw_wedge(wedges) {
             var start = Math.floor(Math.random() * 290);
             var end = start + 70;
             var colour = (Math.random() >= 0.5 ? col1 : col2);
-            var dist = 350;
+            var dist = 260;
             wedges.push(new Wedge(start, end, colour, dist));
         }
     }
@@ -149,7 +150,7 @@ function draw_catcher() {
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.beginPath();
     ctx.arc(0, 0, catcher.size, start, end, true); 
-    ctx.lineWidth = 9;
+    ctx.lineWidth = 19;
     ctx.strokeStyle = catcher.colour;
     ctx.stroke();
     ctx.closePath();
