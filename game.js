@@ -17,10 +17,11 @@ var col1 = 'orange';
 var col2 = 'blue';
 var SCORE = 0;
 
-var test_wedge = new Wedge(0, 70, col1, 200);
-var test_wedge_2 = new Wedge(70, 140, col2, 290);
-var test_wedge_3 = new Wedge(200, 270, col1, 370);
-var wedges = [test_wedge, test_wedge_2, test_wedge_3];
+var t1 = new Wedge(0, 90, col1, 200);
+var t2 = new Wedge(90, 180, col2, 260);
+var t3 = new Wedge(180, 270, col1, 320);
+var t4 = new Wedge(270, 360, col2, 380);
+var wedges = [t1, t2, t3, t4];
 
 var catcher = {
     'bearing': 0,
@@ -161,10 +162,10 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas
     
     if (rightPressed) {
-        catcher.set_bearing((catcher.bearing+3) % 360);
+        catcher.set_bearing((catcher.bearing+5) % 360);
     }
     if (leftPressed) {
-        b = catcher.bearing-3
+        b = catcher.bearing-5
         b = (b < 0 ? 360+b : b);
         catcher.set_bearing(b % 360);
     }
@@ -177,6 +178,22 @@ function draw() {
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.beginPath();
+    ctx.strokeStyle = 'grey';
+    ctx.arc(0, 0, 150, 0, 360); 
+    ctx.arc(0, 0, 250, 0, 360); 
+    ctx.arc(0, 0, 350, 0, 360); 
+    ctx.moveTo(60, 0);
+    ctx.lineTo(200, 0);
+    ctx.moveTo(-60, 0);
+    ctx.lineTo(-200, 0);
+    ctx.moveTo(40 * 0.5, 40 * 0.866);
+    ctx.lineTo(canvas.width * 0.5, canvas.height * 0.866);
+    ctx.moveTo(-40 * 0.5, 40 * 0.866);
+    ctx.lineTo(canvas.width * -0.5, canvas.height * 0.866);
+    ctx.moveTo(40 * 0.5, 40 * -0.866);
+    ctx.lineTo(canvas.width * 0.5, canvas.height * -0.866);
+    ctx.moveTo(40 * -0.5, 40 * -0.866);
+    ctx.lineTo(canvas.width * -0.5, canvas.height * -0.866);
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
