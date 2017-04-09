@@ -36,18 +36,23 @@ var catcher = {
 }
 
 function check(wedges) {
-    var start = Math.min(catcher.bearing, (catcher.bearing + catcher.width) % 360); 
-    var end = Math.max(catcher.bearing, (catcher.bearing + catcher.width) % 360);  
+    var start = catcher.bearing;
+    var end = (start + (360-catcher.width) % 360);
     var wedge = wedges[0];
     if (wedge.dist > catcher.size) {
         return 0;
     }
-    if (start > wedge.start || end < wedge.end) {
-        console.log(start, end, wedge.start, wedge.end);
-        return -1;
-    }
     if (wedge.colour !== catcher.colour) {
         return -1; // Collision 
+    }
+    // The following code is cheem. Idea by marvin
+    var s = 0;
+    var e = ((end - start) < 0 ? 360-(end-start): end-start);
+    var ws = ((wedge.start - start) < 0 ? 360+(wedge.start-start) : wedge.start - start);
+    var we = ((wedge.end- start) < 0 ? 360+(wedge.end-start) : wedge.end- start);
+    if (s > ws || e < we) {
+        console.log(s, e, ws, we);
+        return -1;
     }
     return(2);
 }
@@ -106,8 +111,8 @@ function draw_wedge(wedges) {
     ctx.translate(canvas.width/2, canvas.height/2);
 
     for (let wedge of wedges) {
-        var start = (wedge.start/360 * t) % t;
-        var end = ((wedge.end)/360 * t) % t;
+        var start = ((wedge.start/360) * t) % t;
+        var end = ((wedge.end/360) * t) % t;
         if (wedge.dist > catcher.size) {
             wedge.set_dist(wedge.dist - 1);
             ctx.beginPath();
@@ -121,9 +126,7 @@ function draw_wedge(wedges) {
             // Remove the wedge: JS will GC it
             var idx = wedges.indexOf(wedge);
             wedges.splice(idx, 1);
-            var min = 0;
-            var max = 290;
-            var start = Math.floor(Math.random() * (max - min)) + min;
+            var start = Math.floor(Math.random() * 290);
             var end = start + 70;
             var colour = (Math.random() >= 0.5 ? col1 : col2);
             var dist = 350;
@@ -138,13 +141,13 @@ function draw_catcher() {
     var ctx = canvas.getContext("2d");
     var t = Math.PI*2;
 
-    var start = Math.min(catcher.bearing, catcher.bearing + catcher.width)/360 * t % t;
-    var end = Math.max(catcher.bearing, catcher.bearing + catcher.width)/360 * t % t;
+    var start = Math.min(catcher.bearing, catcher.bearing + 360 -catcher.width)/360 * t % t;
+    var end = Math.max(catcher.bearing, catcher.bearing + 360 - catcher.width)/360 * t % t;
 
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.beginPath();
-    ctx.arc(0, 0, catcher.size, start, end); 
+    ctx.arc(0, 0, catcher.size, start, end, true); 
     ctx.lineWidth = 9;
     ctx.strokeStyle = catcher.colour;
     ctx.stroke();
