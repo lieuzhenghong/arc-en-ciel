@@ -19,9 +19,9 @@ var col2 = 'blue';
 var SCORE = 0;
 
 var t1 = new Wedge(0, 90, col1, 200);
-var t2 = new Wedge(90, 180, col2, 240);
-var t3 = new Wedge(180, 270, col1, 280);
-var t4 = new Wedge(270, 360, col2, 320);
+var t2 = new Wedge(90, 180, col2, 280);
+var t3 = new Wedge(180, 270, col1, 360);
+var t4 = new Wedge(270, 360, col2, 440);
 var wedges = [t1, t2, t3, t4];
 
 var catcher = {
@@ -41,7 +41,7 @@ function generate_wedge() {
     let start = Math.floor(Math.random() * 290);
     let end = start + 60;
     let colour = (Math.random() >= 0.5 ? col1 : col2);
-    let dist = 260;
+    let dist = 400;
     return(new Wedge(start, end, colour, dist));
 }
 
@@ -64,14 +64,14 @@ function check(wedges) {
         var w_s = (ws-start < 0) ? (360+(ws-start)) : (ws-start);
         var w_e = (we-start < 0) ? (360+(we-start)): (we-start);
         var overlap = 0;
-        if (wedge.colour !== catcher.colour) {
-            overlap = 0;
+        if ((wedge.colour !== catcher.colour) && (!(w_s > w_e && w_e < s) && !(w_s < w_e && w_s > e))) {
+            overlap = (-100);
         }
         else if (w_s > w_e && w_e < s) { // Missed on the left 
-            overlap = 0;
+            overlap = -50;
         }
         else if (w_s < w_e && w_s > e) { // Missed on the right
-            overlap = 0;
+            overlap = -50;
         }
         else if (w_s > w_e) { // Overlap from the right (hanging left)
             overlap = Math.round((w_e / wedge_size * 100 ));
@@ -220,7 +220,7 @@ function mouseMoveHandler(e) {
 
 function update_wedges(wedges) {
     for (let wedge of wedges) {
-        wedge.dist -= 10;
+        wedge.dist -= 15;
     }
 }
 
@@ -232,8 +232,8 @@ function update(){
 function init(){
     var canvas = document.getElementById('c');
     // Set canvas dimensions
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = (document.documentElement.clientWidth);
+    canvas.height = document.documentElement.clientHeight;
     document.addEventListener('keydown', keyDownHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
     window.requestAnimationFrame(draw);
