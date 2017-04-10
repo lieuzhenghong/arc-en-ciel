@@ -95,7 +95,8 @@ function mouseMoveHandler(e) {
     var x = pos.x - canvas.width/2;
     var y = pos.y - canvas.height/2;
     var angle = Math.atan2(y, x) / (Math.PI * 2) * 360;
-    catcher.set_bearing(angle);
+    var w = (360 - catcher.width)
+    catcher.set_bearing((angle - w/2) < 0 ? 360+(angle-w/2) : (angle-w/2));
 }
 
 function get_mouse_pos(e) {
