@@ -27,7 +27,7 @@ var wedges = [t1, t2, t3, t4];
 var catcher = {
     'bearing': 0,
     'colour': col1,
-    'width': 260,
+    'width': 100,
     'size': 100,
     'set_bearing': function(deg) { 
         catcher['bearing'] = (deg < 0 ? (360 + deg)%360 : deg%360);
@@ -36,28 +36,57 @@ var catcher = {
         catcher['colour'] = col;
     }
 };
+
+function generate_wedge() {
+    let start = Math.floor(Math.random() * 290);
+    let end = start + 60;
+    let colour = (Math.random() >= 0.5 ? col1 : col2);
+    let dist = 260;
+    return(new Wedge(start, end, colour, dist));
+}
+
+
 function check(wedges) {
     var start = catcher.bearing;
-    var end = (start + (360-catcher.width));
+    var end = (start + (catcher.width));
     var wedge = wedges[0];
     var ws = wedge.start;
     var we = wedge.end;
+    var wedge_size = (ws - we < 0) ? we-ws : ws-we;
+    var overlap = 0;
 
     if (wedge.dist > catcher.size) {
-        return 0;
+        overlap = 0;
     }
-    if (wedge.colour !== catcher.colour) {
-        return -1; // Collision 
+    else {
+        var s = start-start;
+        var e = (end-start < 0) ? (end-start+360) : (end-start);
+        var w_s = (ws-start < 0) ? (360+(ws-start)) : (ws-start);
+        var w_e = (we-start < 0) ? (360+(we-start)): (we-start);
+        var overlap = 0;
+        if (wedge.colour !== catcher.colour) {
+            overlap = 0;
+        }
+        else if (w_s > w_e && w_e < s) { // Missed on the left 
+            overlap = 0;
+        }
+        else if (w_s < w_e && w_s > e) { // Missed on the right
+            overlap = 0;
+        }
+        else if (w_s > w_e) { // Overlap from the right (hanging left)
+            overlap = Math.round((w_e / wedge_size * 100 ));
+        }
+        else if (w_e > w_s && w_e < e) { // Firmly within
+            overlap = 100;
+        }
+        else {
+            overlap = Math.round((wedge_size - (w_e-e)) / wedge_size * 100);
+        }
+        let idx = wedges.indexOf(wedge);
+        wedges.splice(idx, 1);
+        wedges.push(generate_wedge(wedges));
     }
-    
-    var e = (end-start < 0) ? (end-start+360) : (end-start);
-    var w_s = (ws-start < 0) ? (360+(ws-start)) : (ws-start);
-    var w_e = (we-start < 0) ? (360+(we-start)): (we-start);
-
-    if (w_s < w_e && w_e < e) {
-        return 2;
-    }
-    return -1;
+    return(overlap)
 }
 
 function readline(line) {
@@ -66,46 +95,12 @@ function readline(line) {
 }
 
 function keyDownHandler(e) {
-    if(e.keyCode == 39) {
-        rightPressed = true;
-    }
-    else if(e.keyCode == 37) {
-        leftPressed = true;
-    }
-    else if (e.keyCode == 49) {
+    if (e.keyCode == 49) {
         catcher.set_colour(col1);
     }
     else if (e.keyCode == 50) {
         catcher.set_colour(col2);
     }
-}
-
-function keyUpHandler(e) {
-    if(e.keyCode == 39) {
-        rightPressed = false;
-    }
-    else if(e.keyCode == 37) {
-        leftPressed = false;
-    }
-}
-
-function mouseMoveHandler(e) {
-    var canvas = document.getElementById('c');
-    var pos = get_mouse_pos(e); 
-    var x = pos.x - canvas.width/2;
-    var y = pos.y - canvas.height/2;
-    var angle = Math.atan2(y, x) / (Math.PI * 2) * 360;
-    var w = (360 - catcher.width)
-    catcher.set_bearing((angle - w/2) < 0 ? 360+(angle-w/2) : (angle-w/2));
-}
-
-function get_mouse_pos(e) {
-    var canvas = document.getElementById('c');
-    var rect = canvas.getBoundingClientRect(); 
-    return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-    };
 }
 
 function draw_score() {
@@ -133,25 +128,12 @@ function draw_wedge(wedges) {
     for (let wedge of wedges) {
         let start = ((wedge.start/360) * t) % t;
         let end = ((wedge.end/360) * t) % t;
-        if (wedge.dist > catcher.size) {
-            wedge.set_dist(wedge.dist - 1);
-            ctx.beginPath();
-            ctx.arc(0, 0, wedge.dist, start, end, false); 
-            ctx.lineWidth = 9;
-            ctx.strokeStyle = wedge.colour;
-            ctx.stroke();
-            ctx.closePath();
-        }
-        else {
-            // Remove the wedge: JS will GC it
-            let idx = wedges.indexOf(wedge);
-            wedges.splice(idx, 1);
-            let start = Math.floor(Math.random() * 290);
-            let end = start + 70;
-            let colour = (Math.random() >= 0.5 ? col1 : col2);
-            let dist = 260;
-            wedges.push(new Wedge(start, end, colour, dist));
-        }
+        ctx.beginPath();
+        ctx.arc(0, 0, wedge.dist, start, end, false); 
+        ctx.lineWidth = 9;
+        ctx.strokeStyle = wedge.colour;
+        ctx.stroke();
+        ctx.closePath();
     }
     ctx.restore();
 }
@@ -161,8 +143,8 @@ function draw_catcher() {
     var ctx = canvas.getContext('2d');
     var t = Math.PI*2;
 
-    var start = Math.min(catcher.bearing, catcher.bearing + 360 -catcher.width)/360 * t % t;
-    var end = Math.max(catcher.bearing, catcher.bearing + 360 - catcher.width)/360 * t % t;
+    var start = Math.min(catcher.bearing, catcher.bearing + catcher.width)/360 * t % t;
+    var end = Math.max(catcher.bearing, catcher.bearing + catcher.width)/360 * t % t;
 
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
@@ -175,25 +157,9 @@ function draw_catcher() {
     ctx.restore();
 }
 
-function draw() {
+function draw_stage(){
     var canvas = document.getElementById('c');
     var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas
-    
-    if (rightPressed) {
-        catcher.set_bearing((catcher.bearing+5) % 360);
-    }
-    if (leftPressed) {
-        var b = catcher.bearing-5;
-        b = (b < 0 ? 360+b : b);
-        catcher.set_bearing(b % 360);
-    }
-
-    draw_catcher();
-    draw_wedge(wedges);
-    SCORE = SCORE + check(wedges);
-    draw_score();
-    
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.beginPath();
@@ -217,13 +183,55 @@ function draw() {
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
+}
+
+function draw() {
+    var canvas = document.getElementById('c');
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas
+
+    draw_catcher();
+    draw_wedge(wedges);
+    SCORE = SCORE + check(wedges);
+    draw_score();
+    draw_stage();
 
     window.requestAnimationFrame(draw);
 }
 
+function get_mouse_pos(e) {
+    var canvas = document.getElementById('c');
+    var rect = canvas.getBoundingClientRect(); 
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+}
+
+function mouseMoveHandler(e) {
+    var canvas = document.getElementById('c');
+    var pos = get_mouse_pos(e); 
+    var x = pos.x - canvas.width/2;
+    var y = pos.y - canvas.height/2;
+    var angle = Math.atan2(y, x) / (Math.PI * 2) * 360;
+    var w = (catcher.width)
+    catcher.set_bearing((angle - w/2) < 0 ? 360+(angle-w/2) : (angle-w/2));
+}
+
+function update_wedges(wedges) {
+    for (let wedge of wedges) {
+        wedge.dist -= 10;
+    }
+}
+
+function update(){
+    update_wedges(wedges);
+    SCORE += check(wedges);
+}
+
 function init(){
     document.addEventListener('keydown', keyDownHandler, false);
-    document.addEventListener('keyup', keyUpHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
     window.requestAnimationFrame(draw);
+    window.setInterval(update, 100);
 }
