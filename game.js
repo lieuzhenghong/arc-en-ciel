@@ -230,6 +230,10 @@ function update(){
 }
 
 function init(){
+    var canvas = document.getElementById('c');
+    // Set canvas dimensions
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     document.addEventListener('keydown', keyDownHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
     window.requestAnimationFrame(draw);
