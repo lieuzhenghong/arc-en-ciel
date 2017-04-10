@@ -1,3 +1,4 @@
+'use strict';
 class Wedge {
     constructor(start, end, colour, dist) {
         this.start = start;
@@ -29,39 +30,38 @@ var catcher = {
     'width': 260,
     'size': 100,
     'set_bearing': function(deg) { 
-        catcher['bearing'] = deg%360;
+        catcher['bearing'] = (deg < 0 ? (360 + deg)%360 : deg%360);
     },
     'set_colour': function(col) {
         catcher['colour'] = col;
     }
-}
-
+};
 function check(wedges) {
     var start = catcher.bearing;
-    var end = (start + (360-catcher.width) % 360);
+    var end = (start + (360-catcher.width));
     var wedge = wedges[0];
+    var ws = wedge.start;
+    var we = wedge.end;
+
     if (wedge.dist > catcher.size) {
         return 0;
     }
     if (wedge.colour !== catcher.colour) {
         return -1; // Collision 
     }
-    // The following code is cheem. Idea by marvin
-    var s = 0;
-    var e = ((end - start) < 0 ? 360-(end-start): end-start);
-    var ws = ((wedge.start - start) < 0 ? 360+(wedge.start-start) : wedge.start - start);
-    var we = ((wedge.end- start) < 0 ? 360+(wedge.end-start) : wedge.end- start);
-    if (s > ws || e < we) {
-        console.log(s, e, ws, we);
-        return -1;
+    
+    var e = (end-start < 0) ? (end-start+360) : (end-start);
+    var w_s = (ws-start < 0) ? (360+(ws-start)) : (ws-start);
+    var w_e = (we-start < 0) ? (360+(we-start)): (we-start);
+
+    if (w_s < w_e && w_e < e) {
+        return 2;
     }
-    return(2);
+    return -1;
 }
 
 function readline(line) {
-    // Reads a 72-column row vector which can take the following values: 0, 1, 2
-    
-    arr = [];
+    var arr = [];
     return(arr); 
 }
 
@@ -89,10 +89,27 @@ function keyUpHandler(e) {
     }
 }
 
+function mouseMoveHandler(e) {
+    var canvas = document.getElementById('c');
+    var pos = get_mouse_pos(e); 
+    var x = pos.x - canvas.width/2;
+    var y = pos.y - canvas.height/2;
+    var angle = Math.atan2(y, x) / (Math.PI * 2) * 360;
+    catcher.set_bearing(angle);
+}
+
+function get_mouse_pos(e) {
+    var canvas = document.getElementById('c');
+    var rect = canvas.getBoundingClientRect(); 
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+}
 
 function draw_score() {
-    var canvas = document.getElementById("c");
-    var ctx = canvas.getContext("2d");
+    var canvas = document.getElementById('c');
+    var ctx = canvas.getContext('2d');
     
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
@@ -105,20 +122,20 @@ function draw_score() {
 }
 
 function draw_wedge(wedges) {
-    var canvas = document.getElementById("c");
-    var ctx = canvas.getContext("2d");
+    var canvas = document.getElementById('c');
+    var ctx = canvas.getContext('2d');
     var t = Math.PI*2;
     
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
 
     for (let wedge of wedges) {
-        var start = ((wedge.start/360) * t) % t;
-        var end = ((wedge.end/360) * t) % t;
+        let start = ((wedge.start/360) * t) % t;
+        let end = ((wedge.end/360) * t) % t;
         if (wedge.dist > catcher.size) {
             wedge.set_dist(wedge.dist - 1);
             ctx.beginPath();
-            ctx.arc(0, 0, wedge.dist, start, end); 
+            ctx.arc(0, 0, wedge.dist, start, end, false); 
             ctx.lineWidth = 9;
             ctx.strokeStyle = wedge.colour;
             ctx.stroke();
@@ -126,12 +143,12 @@ function draw_wedge(wedges) {
         }
         else {
             // Remove the wedge: JS will GC it
-            var idx = wedges.indexOf(wedge);
+            let idx = wedges.indexOf(wedge);
             wedges.splice(idx, 1);
-            var start = Math.floor(Math.random() * 290);
-            var end = start + 70;
-            var colour = (Math.random() >= 0.5 ? col1 : col2);
-            var dist = 260;
+            let start = Math.floor(Math.random() * 290);
+            let end = start + 70;
+            let colour = (Math.random() >= 0.5 ? col1 : col2);
+            let dist = 260;
             wedges.push(new Wedge(start, end, colour, dist));
         }
     }
@@ -139,8 +156,8 @@ function draw_wedge(wedges) {
 }
 
 function draw_catcher() {
-    var canvas = document.getElementById("c");
-    var ctx = canvas.getContext("2d");
+    var canvas = document.getElementById('c');
+    var ctx = canvas.getContext('2d');
     var t = Math.PI*2;
 
     var start = Math.min(catcher.bearing, catcher.bearing + 360 -catcher.width)/360 * t % t;
@@ -149,7 +166,7 @@ function draw_catcher() {
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.beginPath();
-    ctx.arc(0, 0, catcher.size, start, end, true); 
+    ctx.arc(0, 0, catcher.size, start, end, false); 
     ctx.lineWidth = 19;
     ctx.strokeStyle = catcher.colour;
     ctx.stroke();
@@ -158,15 +175,15 @@ function draw_catcher() {
 }
 
 function draw() {
-    var canvas = document.getElementById("c");
-    var ctx = canvas.getContext("2d");
+    var canvas = document.getElementById('c');
+    var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas
     
     if (rightPressed) {
         catcher.set_bearing((catcher.bearing+5) % 360);
     }
     if (leftPressed) {
-        b = catcher.bearing-5
+        var b = catcher.bearing-5;
         b = (b < 0 ? 360+b : b);
         catcher.set_bearing(b % 360);
     }
@@ -180,6 +197,7 @@ function draw() {
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.beginPath();
     ctx.strokeStyle = 'grey';
+    ctx.arc(0, 0, 100, 0, 360); 
     ctx.arc(0, 0, 150, 0, 360); 
     ctx.arc(0, 0, 250, 0, 360); 
     ctx.arc(0, 0, 350, 0, 360); 
@@ -203,9 +221,8 @@ function draw() {
 }
 
 function init(){
-    var canvas = document.getElementById("c");
-    var ctx = canvas.getContext("2d");
-    document.addEventListener("keydown", keyDownHandler, false);
-    document.addEventListener("keyup", keyUpHandler, false);
+    document.addEventListener('keydown', keyDownHandler, false);
+    document.addEventListener('keyup', keyUpHandler, false);
+    document.addEventListener('mousemove', mouseMoveHandler, false);
     window.requestAnimationFrame(draw);
 }
