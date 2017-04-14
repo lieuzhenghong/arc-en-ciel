@@ -396,8 +396,10 @@ function init(){
     document.addEventListener('keydown', keyDownHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
     var audio = new Audio('jubeat.mp3');
-    audio.play();
+    audio.addEventListener("canplaythrough", function(){
+        audio.play(); 
+        window.setInterval(update, TICK_LENGTH);
+    }, false); 
     window.requestAnimationFrame(draw);
     read_beatmap(DATA);
-    window.setInterval(update, TICK_LENGTH);
 }
