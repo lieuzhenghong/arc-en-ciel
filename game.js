@@ -17,12 +17,11 @@ var leftPressed = false;
 var col1 = 'orange';
 var col2 = 'blue';
 var SCORE = 0;
-
-var t1 = new Wedge(0, 90, col1, 200);
-var t2 = new Wedge(90, 180, col2, 280);
-var t3 = new Wedge(180, 270, col1, 360);
-var t4 = new Wedge(270, 360, col2, 440);
-var wedges = [t1, t2, t3, t4];
+var SPEED = 5;
+var TICK_COUNT = 0;
+const WEDGE_THICKNESS = 10;
+const RENDER_DIST = 400;
+const TICK_LENGTH = 40;
 
 var catcher = {
     'bearing': 0,
@@ -37,16 +36,171 @@ var catcher = {
     }
 };
 
-function generate_wedge() {
+/*
+var DATA = ['0 60 1 400 13', 
+            '50 110 1 400 16',
+            '100 160 1 400 19',
+            '150 210 1 400 22'
+            ]
+*/
+
+var DATA = [
+'0 60 1 400 4.3',
+'0 60 2 400 4.7',
+'0 60 1 400 5.1',
+'0 60 2 400 5.5',
+'60 120 1 400 5.9',
+'60 120 2 400 6.3',
+'60 120 1 400 6.7',
+'60 120 2 400 7.1',
+'120 180 2 400 7.5', 
+'130 190 2 400 7.9', 
+'140 200 1 400 8.3', 
+'150 210 1 400 8.7', 
+'220 280 2 400 9.1', 
+'250 310 2 400 9.5', 
+'280 360 1 400 9.9', 
+'0 60 1 400 10.3', 
+'0 60 2 400 10.7',
+'0 60 1 400 11.1',
+'0 60 2 400 11.5',
+'0 60 1 400 11.9',
+'60 120 2 400 12.4',
+'60 120 2 400 12.8',
+'60 120 2 400 13.2',
+'60 120 2 400 13.6',
+'120 180 2 400 14.0', 
+'130 190 2 400 14.4', 
+'140 200 1 400 14.8', 
+'150 210 1 400 15.2', 
+'220 280 2 400 15.6', 
+'250 310 2 400 16.0', 
+'280 360 1 400 16.4',
+'300 20 2 400 16.8',
+'0 60 1 400 17.4', 
+'0 60 2 400 17.8',
+'0 60 1 400 18.2',
+'0 60 2 400 18.6',
+'60 120 2 400 19.3',
+'60 120 2 400 19.7',
+'60 120 2 400 20.1',
+'60 120 2 400 20.5',
+'120 180 2 400 20.9', 
+'130 190 2 400 21.3', 
+'140 200 1 400 21.7', 
+'150 210 1 400 22.1', 
+'220 280 2 400 22.5', 
+'250 310 2 400 22.9', 
+'280 360 1 400 23.3',
+'300 20 2 400 23.7',
+'0 60 2 400 24.1',
+'0 60 2 400 24.5',
+'0 60 2 400 24.9',
+'0 60 2 400 25.3',
+'60 120 1 400 25.8',
+'90 150 1 400 26.2',
+'120 180 1 400 26.6',
+'150 210 1 400 27.0',
+//////////////////////////
+'90 130 2 400 27.6',
+'110 150 2 400 27.7',
+'130 170 2 400 27.8',
+
+'0 40 1 400 28.0',
+'20 60 1 400 28.1',
+'40 80 1 400 28.2',
+
+'90 130 2 400 28.4',
+'110 150 2 400 28.5',
+'130 170 2 400 28.6',
+
+'200 240 1 400 28.8',
+'220 260 1 400 28.9',
+'240 280 1 400 29.0',
+//////////////////////////
+'90 130 1 400 29.2',
+'120 160 1 400 29.3',
+'160 200 1 400 29.4',
+
+'180 220 1 400 29.6',
+'210 250 1 400 29.7',
+'250 290 1 400 29.8',
+
+'300 340 1 400 30.0',
+'340 20 1 400 30.1',
+'20 60 1 400 30.2',
+
+'90 130 1 400 30.4',
+'120 160 1 400 30.5',
+'160 200 1 400 30.6',
+//////////////////////////
+'180 220 2 400 30.8',
+'210 250 2 400 30.9',
+'250 290 2 400 31.0',
+
+'300 340 2 400 31.2',
+'340 20 2 400 31.3',
+'20 60 2 400 31.4',
+
+'90 130 2 400 31.6',
+'120 160 2 400 31.7',
+'160 200 2 400 31.8',
+
+'180 220 2 400 32.0',
+'210 250 2 400 32.1',
+'250 290 2 400 32.2',
+//////////////////////////
+'300 340 1 400 32.4',
+'340 20 1 400 32.5',
+'20 60 1 400 32.6',
+
+'90 130 1 400 32.8',
+'120 160 1 400 32.9',
+'160 200 1 400 33.0',
+
+'180 220 1 400 33.2',
+'210 250 1 400 33.3',
+'250 290 1 400 33.4',
+
+'300 340 1 400 33.6',
+'340 20 1 400 33.7',
+'20 60 1 400 33.8'
+//////////////////////////
+    ];
+
+var WEDGES = []
+
+function read_beatmap(beatmap) {
+    for (var line of beatmap) {
+        var beat = line.split(' '); 
+        // Conversion
+        for (let i = 0; i < beat.length; i++) {
+            beat[i] = parseFloat(beat[i]);
+        }
+        WEDGES.push(generate_wedge(beat[0],
+                    beat[1], beat[2], 
+                    0+(SPEED * 1000/TICK_LENGTH * beat[4])
+                    )
+        );
+    }
+}
+
+function generate_wedge(start, end, colour, dist) {
+    /*
     let start = Math.floor(Math.random() * 290);
     let end = start + 60;
     let colour = (Math.random() >= 0.5 ? col1 : col2);
     let dist = 400;
-    return(new Wedge(start, end, colour, dist));
+    */
+    let col = (colour == '1' ? col1 : col2);
+    return(new Wedge(start, end, col, dist));
 }
 
 
 function check(wedges) {
+    if (wedges.length == 0) {
+        return (0);
+    }
     var start = catcher.bearing;
     var end = (start + (catcher.width));
     var wedge = wedges[0];
@@ -84,7 +238,6 @@ function check(wedges) {
         }
         let idx = wedges.indexOf(wedge);
         wedges.splice(idx, 1);
-        wedges.push(generate_wedge(wedges));
     }
     return(overlap)
 }
@@ -126,14 +279,19 @@ function draw_wedge(wedges) {
     ctx.translate(canvas.width/2, canvas.height/2);
 
     for (let wedge of wedges) {
-        let start = ((wedge.start/360) * t) % t;
-        let end = ((wedge.end/360) * t) % t;
-        ctx.beginPath();
-        ctx.arc(0, 0, wedge.dist, start, end, false); 
-        ctx.lineWidth = 9;
-        ctx.strokeStyle = wedge.colour;
-        ctx.stroke();
-        ctx.closePath();
+        if (wedge.dist > RENDER_DIST) {
+            break;
+        }
+        if (wedge.dist <= RENDER_DIST) {
+            let start = ((wedge.start/360) * t) % t;
+            let end = ((wedge.end/360) * t) % t;
+            ctx.beginPath();
+            ctx.arc(0, 0, wedge.dist, start, end, false); 
+            ctx.lineWidth = WEDGE_THICKNESS;
+            ctx.strokeStyle = wedge.colour;
+            ctx.stroke();
+            ctx.closePath();
+        }
     }
     ctx.restore();
 }
@@ -191,8 +349,8 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas
 
     draw_catcher();
-    draw_wedge(wedges);
-    SCORE = SCORE + check(wedges);
+    draw_wedge(WEDGES);
+    SCORE = SCORE + check(WEDGES);
     draw_score();
     draw_stage();
 
@@ -220,13 +378,14 @@ function mouseMoveHandler(e) {
 
 function update_wedges(wedges) {
     for (let wedge of wedges) {
-        wedge.dist -= 15;
+        wedge.dist -= SPEED;
     }
 }
 
 function update(){
-    update_wedges(wedges);
-    SCORE += check(wedges);
+    TICK_COUNT++;
+    update_wedges(WEDGES);
+    SCORE += check(WEDGES);
 }
 
 function init(){
@@ -236,6 +395,9 @@ function init(){
     canvas.height = document.documentElement.clientHeight;
     document.addEventListener('keydown', keyDownHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
+    var audio = new Audio('jubeat.mp3');
+    audio.play();
     window.requestAnimationFrame(draw);
-    window.setInterval(update, 100);
+    read_beatmap(DATA);
+    window.setInterval(update, TICK_LENGTH);
 }
