@@ -23,6 +23,8 @@ const CATCHER_THICKNESS = 15;
 const WEDGE_THICKNESS = 10;
 const RENDER_DIST = 600;
 const TICK_LENGTH = 40;
+const LEEWAY = 20;
+var KEY_PRESSED = 0;
 
 var catcher = {
     'bearing': 0,
@@ -82,6 +84,7 @@ var DATA = [
 '0 60 2 400 16.8',
 '0 60 1 400 17.2',
 '0 60 2 400 17.6',
+'60 120 2 400 18.0',
 '60 120 2 400 18.3',
 '60 120 2 400 18.7',
 '60 120 2 400 19.1',
@@ -207,39 +210,64 @@ function check(wedges) {
     var start = catcher.bearing;
     var end = (start + (catcher.width));
     var overlap = 0;
+    var hit = false;
     for (var wedge of wedges) {
         var ws = wedge.start;
         var we = wedge.end;
+        var s = start-start;
+        var e = (end-start < 0) ? (end-start+360) : (end-start);
+        var w_s = (ws-start < 0) ? (360+(ws-start)) : (ws-start);
+        var w_e = (we-start < 0) ? (360+(we-start)): (we-start);
         var wedge_size = (ws - we < 0) ? we-ws : ws-we;
 
-        if (wedge.dist > catcher.size) {
+        if (wedge.dist > catcher.size + LEEWAY + WEDGE_THICKNESS) {
             return(overlap);
         }
+        else if (wedge.dist > catcher.size + WEDGE_THICKNESS) {
+            if (KEY_PRESSED !== 0 && catcher.colour == wedge.colour) {
+                hit = true;
+                if (w_s > w_e) { // Overlap from the right (hanging left)
+                    overlap = Math.round((w_e / wedge_size * 100 ));
+                }
+                else if (w_e > w_s && w_e < e) { // Firmly within
+                    overlap = 100;
+                }
+                else {
+                    overlap = Math.round((wedge_size - (w_e-e)) / 
+                                          wedge_size * 100
+                                         );
+                }
+            }
+            if (hit) {
+                let idx = wedges.indexOf(wedge);
+                wedges.splice(idx, 1);
+            }
+        }
+        else if (wedge.dist > catcher.size + WEDGE_THICKNESS - LEEWAY) {
+            if (KEY_PRESSED !==0 && catcher.colour == wedge.colour) {
+                hit = true;
+                if (w_s > w_e) { // Overlap from the right (hanging left)
+                    overlap = Math.round((w_e / wedge_size * 100 ));
+                }
+                else if (w_e > w_s && w_e < e) { // Firmly within
+                    overlap = 100;
+                }
+                else {
+                    overlap = Math.round((wedge_size - (w_e-e)) / wedge_size * 100);
+                    console.log(overlap);
+                }
+            }
+            else if (KEY_PRESSED !== 0 && catcher.colour !== wedge.colour) {
+                hit = true;
+                overlap = -100;
+            }
+            if (hit) {
+                let idx = wedges.indexOf(wedge);
+                wedges.splice(idx, 1);
+            }
+        }
         else {
-            console.log('hit');
-            var s = start-start;
-            var e = (end-start < 0) ? (end-start+360) : (end-start);
-            var w_s = (ws-start < 0) ? (360+(ws-start)) : (ws-start);
-            var w_e = (we-start < 0) ? (360+(we-start)): (we-start);
-            if ((wedge.colour !== catcher.colour) && (!(w_s > w_e && w_e < s) && !(w_s < w_e && w_s > e))) {
-                overlap = (-100);
-            }
-            else if (w_s > w_e && w_e < s) { // Missed on the left 
-                overlap = -50;
-            }
-            else if (w_s < w_e && w_s > e) { // Missed on the right
-                overlap = -50;
-            }
-            else if (w_s > w_e) { // Overlap from the right (hanging left)
-                overlap = Math.round((w_e / wedge_size * 100 ));
-            }
-            else if (w_e > w_s && w_e < e) { // Firmly within
-                overlap = 100;
-            }
-            else {
-                overlap = Math.round((wedge_size - (w_e-e)) / wedge_size * 100);
-                console.log(overlap);
-            }
+            overlap = -100;
             let idx = wedges.indexOf(wedge);
             wedges.splice(idx, 1);
         }
@@ -250,9 +278,21 @@ function check(wedges) {
 function keyDownHandler(e) {
     if (e.keyCode == 49) {
         catcher.set_colour(col1);
+        KEY_PRESSED = 1;
     }
     else if (e.keyCode == 50) {
         catcher.set_colour(col2);
+        KEY_PRESSED = 2;
+    }
+}
+function keyUpHandler(e) {
+    if (e.keyCode == 49) {
+        catcher.set_colour(col1);
+        KEY_PRESSED = 0;
+    }
+    else if (e.keyCode == 50) {
+        catcher.set_colour(col2);
+        KEY_PRESSED = 0;
     }
 }
 
@@ -394,6 +434,7 @@ function init(){
     canvas.width = (document.documentElement.clientWidth);
     canvas.height = document.documentElement.clientHeight;
     document.addEventListener('keydown', keyDownHandler, false);
+    document.addEventListener('keyup', keyUpHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
     var audio = new Audio('jubeat.mp3');
     audio.addEventListener("canplaythrough", function(){
