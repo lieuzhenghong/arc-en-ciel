@@ -190,7 +190,7 @@ function read_beatmap(beatmap: string[]) {
         var line_arr: string[] = line.split(' '); 
         var beat : number[] = [];
         // Conversion
-        for (let i = 0; i < beat.length; i++) {
+        for (let i = 0; i < line_arr.length; i++) {
             beat[i] = parseFloat(line_arr[i]);
         }
         WEDGES.push(generate_wedge(
@@ -217,7 +217,7 @@ function generate_wedge(start: number, end: number, colour: number, dist: number
 
 function check(wedges) {
     if (wedges.length == 0) {
-        return (0);
+        return 0;
     }
     var start = CATCHER.bearing;
     var end = (start + (CATCHER.width));

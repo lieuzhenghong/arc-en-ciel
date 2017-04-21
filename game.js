@@ -154,7 +154,7 @@ function read_beatmap(beatmap) {
         var line_arr = line.split(' ');
         var beat = [];
         // Conversion
-        for (var i = 0; i < beat.length; i++) {
+        for (var i = 0; i < line_arr.length; i++) {
             beat[i] = parseFloat(line_arr[i]);
         }
         WEDGES.push(generate_wedge(beat[0], beat[1], beat[2], CATCHER.radius + WEDGE_THICKNESS + (SPEED * 1000 / TICK_LENGTH * beat[4])));
@@ -172,7 +172,7 @@ function generate_wedge(start, end, colour, dist) {
 }
 function check(wedges) {
     if (wedges.length == 0) {
-        return (0);
+        return 0;
     }
     var start = CATCHER.bearing;
     var end = (start + (CATCHER.width));
