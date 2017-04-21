@@ -447,7 +447,7 @@ function init(){
     document.addEventListener('keydown', keyDownHandler, false);
     document.addEventListener('keyup', keyUpHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
-    var audio = new Audio('jubeat.mp3');
+    var audio = new Audio('beatmaps/jubeat/song.mp3');
     audio.addEventListener('canplaythrough', function(){
         audio.play(); 
         window.setInterval(update, TICK_LENGTH);
