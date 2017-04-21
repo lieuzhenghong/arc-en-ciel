@@ -9,6 +9,9 @@ var Wedge = (function () {
     Wedge.prototype.set_dist = function (dist) {
         this.dist = dist;
     };
+    Wedge.prototype.update = function (speed) {
+        this.set_dist(this.dist - speed);
+    };
     return Wedge;
 }());
 var COL1 = 'orange';
@@ -369,7 +372,7 @@ function mouseMoveHandler(e) {
 function update_wedges(wedges) {
     for (var _i = 0, wedges_3 = wedges; _i < wedges_3.length; _i++) {
         var wedge = wedges_3[_i];
-        wedge.dist -= SPEED;
+        wedge.update(SPEED);
     }
 }
 function update() {
@@ -385,7 +388,7 @@ function init() {
     document.addEventListener('keydown', keyDownHandler, false);
     document.addEventListener('keyup', keyUpHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
-    var audio = new Audio('jubeat.mp3');
+    var audio = new Audio('beatmaps/jubeat/song.mp3');
     audio.addEventListener('canplaythrough', function () {
         audio.play();
         window.setInterval(update, TICK_LENGTH);

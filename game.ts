@@ -22,6 +22,9 @@ class Wedge {
     set_dist(dist: number){
         this.dist = dist;
     }
+    update(speed: number) {
+        this.set_dist(this.dist-speed);
+    }
 }
 
 var COL1 = 'orange';
@@ -429,7 +432,7 @@ function mouseMoveHandler(e) {
 
 function update_wedges(wedges) {
     for (let wedge of wedges) {
-        wedge.dist -= SPEED;
+        wedge.update(SPEED);
     }
 }
 
