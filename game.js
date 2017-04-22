@@ -26,6 +26,9 @@ var TICK_LENGTH = 30;
 var LEEWAY = 20;
 var KEY_PRESSED = 0;
 var WEDGES = [];
+// Will be initialised during init() function call
+var CANVAS = null;
+var CTX = null;
 ;
 var CATCHER = {
     'bearing': 0,
@@ -40,7 +43,6 @@ var CATCHER = {
         CATCHER['colour'] = col;
     }
 };
-console.log(CATCHER.distance);
 var DATA = [
     'START 2.80',
     '0 60 1 400 0.42',
@@ -242,7 +244,6 @@ function check(wedges) {
     else {
         overlap = -100;
         var idx = wedges.indexOf(wedge);
-        console.log(idx);
         wedges.splice(idx, 1);
     }
     return (overlap);
@@ -268,23 +269,19 @@ function keyUpHandler(e) {
     }
 }
 function draw_score() {
-    var canvas = document.getElementById('c');
-    var ctx = canvas.getContext('2d');
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.font = '48px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'white';
-    ctx.fillText(SCORE.toString(), 0, 0);
-    ctx.restore();
+    CTX.save();
+    CTX.translate(CANVAS.width / 2, CANVAS.height / 2);
+    CTX.font = '48px serif';
+    CTX.textAlign = 'center';
+    CTX.textBaseline = 'middle';
+    CTX.fillStyle = 'white';
+    CTX.fillText(SCORE.toString(), 0, 0);
+    CTX.restore();
 }
 function draw_wedge(wedges) {
-    var canvas = document.getElementById('c');
-    var ctx = canvas.getContext('2d');
     var t = Math.PI * 2;
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
+    CTX.save();
+    CTX.translate(CANVAS.width / 2, CANVAS.height / 2);
     for (var _i = 0, wedges_1 = wedges; _i < wedges_1.length; _i++) {
         var wedge = wedges_1[_i];
         if (wedge.dist > CATCHER.distance + RENDER_DIST) {
@@ -293,63 +290,57 @@ function draw_wedge(wedges) {
         else {
             var start = ((wedge.start / 360) * t) % t;
             var end = ((wedge.end / 360) * t) % t;
-            ctx.beginPath();
-            ctx.arc(0, 0, wedge.dist - CATCHER.distance + CATCHER.radius, start, end, false);
-            ctx.lineWidth = WEDGE_THICKNESS;
-            ctx.strokeStyle = wedge.colour;
-            ctx.stroke();
-            ctx.closePath();
+            CTX.beginPath();
+            CTX.arc(0, 0, wedge.dist - CATCHER.distance + CATCHER.radius, start, end, false);
+            CTX.lineWidth = WEDGE_THICKNESS;
+            CTX.strokeStyle = wedge.colour;
+            CTX.stroke();
+            CTX.closePath();
         }
     }
-    ctx.restore();
+    CTX.restore();
 }
 function draw_catcher(catcher) {
-    var canvas = document.getElementById('c');
-    var ctx = canvas.getContext('2d');
     var t = Math.PI * 2;
     var start = Math.min(CATCHER.bearing, CATCHER.bearing + CATCHER.width) / 360 * t % t;
     var end = Math.max(CATCHER.bearing, CATCHER.bearing + CATCHER.width) / 360 * t % t;
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.beginPath();
-    ctx.arc(0, 0, CATCHER.radius, start, end, false);
-    ctx.lineWidth = CATCHER_THICKNESS;
-    ctx.strokeStyle = CATCHER.colour;
-    ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
+    CTX.save();
+    CTX.translate(CANVAS.width / 2, CANVAS.height / 2);
+    CTX.beginPath();
+    CTX.arc(0, 0, CATCHER.radius, start, end, false);
+    CTX.lineWidth = CATCHER_THICKNESS;
+    CTX.strokeStyle = CATCHER.colour;
+    CTX.stroke();
+    CTX.closePath();
+    CTX.restore();
 }
 function draw_stage() {
-    var canvas = document.getElementById('c');
-    var ctx = canvas.getContext('2d');
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.beginPath();
-    ctx.strokeStyle = 'grey';
-    ctx.arc(0, 0, 100, 0, 360);
-    ctx.arc(0, 0, 150, 0, 360);
-    ctx.arc(0, 0, 250, 0, 360);
-    ctx.arc(0, 0, 350, 0, 360);
-    ctx.moveTo(60, 0);
-    ctx.lineTo(200, 0);
-    ctx.moveTo(-60, 0);
-    ctx.lineTo(-200, 0);
-    ctx.moveTo(40 * 0.5, 40 * 0.866);
-    ctx.lineTo(canvas.width * 0.5, canvas.height * 0.866);
-    ctx.moveTo(-40 * 0.5, 40 * 0.866);
-    ctx.lineTo(canvas.width * -0.5, canvas.height * 0.866);
-    ctx.moveTo(40 * 0.5, 40 * -0.866);
-    ctx.lineTo(canvas.width * 0.5, canvas.height * -0.866);
-    ctx.moveTo(40 * -0.5, 40 * -0.866);
-    ctx.lineTo(canvas.width * -0.5, canvas.height * -0.866);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
+    CTX.save();
+    CTX.translate(CANVAS.width / 2, CANVAS.height / 2);
+    CTX.beginPath();
+    CTX.strokeStyle = 'grey';
+    CTX.arc(0, 0, 100, 0, 360);
+    CTX.arc(0, 0, 150, 0, 360);
+    CTX.arc(0, 0, 250, 0, 360);
+    CTX.arc(0, 0, 350, 0, 360);
+    CTX.moveTo(60, 0);
+    CTX.lineTo(200, 0);
+    CTX.moveTo(-60, 0);
+    CTX.lineTo(-200, 0);
+    CTX.moveTo(40 * 0.5, 40 * 0.866);
+    CTX.lineTo(CANVAS.width * 0.5, CANVAS.height * 0.866);
+    CTX.moveTo(-40 * 0.5, 40 * 0.866);
+    CTX.lineTo(CANVAS.width * -0.5, CANVAS.height * 0.866);
+    CTX.moveTo(40 * 0.5, 40 * -0.866);
+    CTX.lineTo(CANVAS.width * 0.5, CANVAS.height * -0.866);
+    CTX.moveTo(40 * -0.5, 40 * -0.866);
+    CTX.lineTo(CANVAS.width * -0.5, CANVAS.height * -0.866);
+    CTX.stroke();
+    CTX.closePath();
+    CTX.restore();
 }
 function draw() {
-    var canvas = document.getElementById('c');
-    var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas
+    CTX.clearRect(0, 0, CANVAS.width, CANVAS.height); // clear CANVAS
     draw_catcher(CATCHER);
     draw_wedge(WEDGES);
     SCORE = SCORE + check(WEDGES);
@@ -358,23 +349,23 @@ function draw() {
     window.requestAnimationFrame(draw);
 }
 function get_mouse_pos(e) {
-    var canvas = document.getElementById('c');
-    var rect = canvas.getBoundingClientRect();
+    var rect = CANVAS.getBoundingClientRect();
     return {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
     };
 }
 function mouseMoveHandler(e) {
-    var canvas = document.getElementById('c');
     var pos = get_mouse_pos(e);
-    var x = pos.x - canvas.width / 2;
-    var y = pos.y - canvas.height / 2;
+    var x = pos.x - CANVAS.width / 2;
+    var y = pos.y - CANVAS.height / 2;
     var angle = Math.atan2(y, x) / (Math.PI * 2) * 360;
     var w = (CATCHER.width);
     CATCHER.set_bearing((angle - w / 2) < 0 ? 360 + (angle - w / 2) : (angle - w / 2));
 }
 function update_wedges(wedges) {
+    // Instead of iterating every single wedge, I chose a more performant
+    // approach
     /*
     for (let wedge of wedges) {
         wedge.update(SPEED);
@@ -388,10 +379,10 @@ function update() {
     SCORE += check(WEDGES);
 }
 function init() {
-    var canvas = document.getElementById('c');
-    // Set canvas dimensions
-    canvas.width = (document.documentElement.clientWidth);
-    canvas.height = document.documentElement.clientHeight;
+    CANVAS = document.getElementById('c');
+    CTX = CANVAS.getContext('2d');
+    CANVAS.width = (document.documentElement.clientWidth);
+    CANVAS.height = (document.documentElement.clientHeight);
     document.addEventListener('keydown', keyDownHandler, false);
     document.addEventListener('keyup', keyUpHandler, false);
     document.addEventListener('mousemove', mouseMoveHandler, false);
