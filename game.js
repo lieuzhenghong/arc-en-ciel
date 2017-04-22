@@ -17,12 +17,12 @@ var Wedge = (function () {
 var COL1 = 'orange';
 var COL2 = 'blue';
 var SCORE = 0;
-var SPEED = 10;
+var SPEED = 7;
 var TICK_COUNT = 0;
 var CATCHER_THICKNESS = 15;
 var WEDGE_THICKNESS = 10;
 var RENDER_DIST = 600;
-var TICK_LENGTH = 40;
+var TICK_LENGTH = 30;
 var LEEWAY = 20;
 var KEY_PRESSED = 0;
 var WEDGES = [];
@@ -32,6 +32,7 @@ var CATCHER = {
     'colour': COL1,
     'width': 100,
     'radius': 100,
+    'distance': 100 + CATCHER_THICKNESS,
     'set_bearing': function (deg) {
         CATCHER['bearing'] = (deg < 0 ? (360 + deg) % 360 : deg % 360);
     },
@@ -39,128 +40,132 @@ var CATCHER = {
         CATCHER['colour'] = col;
     }
 };
+console.log(CATCHER.distance);
 var DATA = [
-    '0 60 1 400 3.3',
-    '0 60 2 400 3.7',
-    '0 60 1 400 4.1',
-    '0 60 2 400 4.5',
-    '60 120 1 400 4.9',
-    '60 120 2 400 5.3',
-    '60 120 1 400 5.7',
-    '60 120 2 400 6.1',
-    '120 180 2 400 6.5',
-    '130 190 2 400 6.9',
-    '140 200 1 400 7.3',
-    '150 210 1 400 7.7',
-    '220 280 2 400 8.1',
-    '250 310 2 400 8.5',
-    '280 360 1 400 8.9',
-    '0 60 1 400 9.3',
-    '0 60 2 400 9.7',
-    '0 60 1 400 10.1',
-    '0 60 2 400 10.5',
-    '0 60 1 400 10.9',
-    '60 120 2 400 11.4',
-    '60 120 2 400 11.8',
-    '60 120 2 400 12.2',
-    '60 120 2 400 12.6',
-    '120 180 2 400 13.0',
-    '130 190 2 400 13.4',
-    '140 200 1 400 13.8',
-    '150 210 1 400 14.2',
-    '220 280 2 400 14.6',
-    '250 310 2 400 15.0',
-    '280 360 1 400 15.4',
-    '300 20 2 400 15.8',
-    '0 60 1 400 16.4',
-    '0 60 2 400 16.8',
-    '0 60 1 400 17.2',
-    '0 60 2 400 17.6',
-    '60 120 2 400 18.0',
-    '60 120 2 400 18.3',
-    '60 120 2 400 18.7',
-    '60 120 2 400 19.1',
-    '60 120 2 400 19.5',
-    '120 180 2 400 19.9',
-    '130 190 2 400 20.3',
-    '140 200 1 400 20.7',
-    '150 210 1 400 21.1',
-    '220 280 2 400 21.5',
-    '250 310 2 400 21.9',
-    '280 360 1 400 22.3',
-    '300 20 2 400 22.7',
-    '0 60 2 400 23.2',
-    '0 60 2 400 23.6',
-    '0 60 2 400 24.0',
-    '0 60 2 400 24.4',
-    '60 120 1 400 24.8',
-    '90 150 1 400 25.2',
-    '120 180 1 400 25.6',
-    '150 210 1 400 26.0',
-    //////////////////////////
-    '90 130 2 400 26.6',
-    '110 150 2 400 26.7',
-    '130 170 2 400 26.8',
-    '0 40 1 400 27.0',
-    '20 60 1 400 27.1',
-    '40 80 1 400 27.2',
-    '90 130 2 400 27.4',
-    '110 150 2 400 27.5',
-    '130 170 2 400 27.6',
-    '200 240 1 400 27.8',
-    '220 260 1 400 27.9',
-    '240 280 1 400 28.0',
-    //////////////////////////
-    '90 130 1 400 28.2',
-    '120 160 1 400 28.3',
-    '160 200 1 400 28.4',
-    '180 220 1 400 28.6',
-    '210 250 1 400 28.7',
-    '250 290 1 400 28.8',
-    '300 340 1 400 29.0',
-    '340 20 1 400 29.1',
-    '20 60 1 400 29.2',
-    '90 130 1 400 29.4',
-    '120 160 1 400 29.5',
-    '160 200 1 400 29.6',
-    //////////////////////////
-    '180 220 2 400 29.8',
-    '210 250 2 400 29.9',
-    '250 290 2 400 30.0',
-    '300 340 2 400 30.2',
-    '340 20 2 400 30.3',
-    '20 60 2 400 30.4',
-    '90 130 2 400 30.6',
-    '120 160 2 400 30.7',
-    '160 200 2 400 30.8',
-    '180 220 2 400 31.0',
-    '210 250 2 400 31.1',
-    '250 290 2 400 31.2',
-    //////////////////////////
-    '300 340 1 400 31.4',
-    '340 20 1 400 31.5',
-    '20 60 1 400 31.6',
-    '90 130 1 400 31.8',
-    '120 160 1 400 31.9',
-    '160 200 1 400 32.0',
-    '180 220 1 400 32.2',
-    '210 250 1 400 32.3',
-    '250 290 1 400 32.4',
-    '300 340 1 400 32.6',
-    '340 20 1 400 32.7',
-    '20 60 1 400 32.8'
-    //////////////////////////
+    'START 2.80',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.42',
+    '0 60 1 400 0.42',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.20',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.20',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.20',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.20',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.20',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.20',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.20',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.20',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.20',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.20',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.20',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.20',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.20',
+    '0 60 1 400 0.10',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.20',
+    '0 60 2 400 0.10',
+    '0 60 1 400 0.10'
 ];
 function read_beatmap(beatmap) {
+    var time = 0;
     for (var _i = 0, beatmap_1 = beatmap; _i < beatmap_1.length; _i++) {
         var line = beatmap_1[_i];
-        var line_arr = line.split(' ');
-        var beat = [];
-        // Conversion
-        for (var i = 0; i < line_arr.length; i++) {
-            beat[i] = parseFloat(line_arr[i]);
+        if (line === beatmap[0]) {
+            var time = parseFloat(line.split(' ')[1]);
         }
-        WEDGES.push(generate_wedge(beat[0], beat[1], beat[2], CATCHER.radius + WEDGE_THICKNESS + (SPEED * 1000 / TICK_LENGTH * beat[4])));
+        else {
+            var line_arr = line.split(' ');
+            var beat = [];
+            // Conversion
+            for (var i = 0; i < line_arr.length; i++) {
+                if (i == 4) {
+                    time += parseFloat(line_arr[i]);
+                }
+                else {
+                    beat[i] = parseFloat(line_arr[i]);
+                }
+            }
+            WEDGES.push(generate_wedge(beat[0], beat[1], beat[2], CATCHER.distance + (SPEED * 1000 / TICK_LENGTH * (time))));
+        }
     }
 }
 function generate_wedge(start, end, colour, dist) {
@@ -181,66 +186,66 @@ function check(wedges) {
     var end = (start + (CATCHER.width));
     var overlap = 0;
     var hit = false;
-    for (var _i = 0, wedges_1 = wedges; _i < wedges_1.length; _i++) {
-        var wedge = wedges_1[_i];
-        var ws = wedge.start;
-        var we = wedge.end;
-        var s = start - start;
-        var e = (end - start < 0) ? (end - start + 360) : (end - start);
-        var w_s = (ws - start < 0) ? (360 + (ws - start)) : (ws - start);
-        var w_e = (we - start < 0) ? (360 + (we - start)) : (we - start);
-        var wedge_radius = (ws - we < 0) ? we - ws : ws - we;
-        if (wedge.dist > CATCHER.radius + LEEWAY + WEDGE_THICKNESS) {
-            return (overlap);
-        }
-        else if (wedge.dist > CATCHER.radius + WEDGE_THICKNESS) {
-            if (KEY_PRESSED !== 0 && CATCHER.colour == wedge.colour) {
-                hit = true;
-                if (w_s > w_e) {
-                    overlap = Math.round((w_e / wedge_radius * 100));
-                }
-                else if (w_e > w_s && w_e < e) {
-                    overlap = 100;
-                }
-                else {
-                    overlap = Math.round((wedge_radius - (w_e - e)) /
-                        wedge_radius * 100);
-                }
+    // I only want to check the first wedge so why am I iterating through them
+    var wedge = wedges[0];
+    var ws = wedge.start;
+    var we = wedge.end;
+    var s = start - start;
+    var e = (end - start < 0) ? (end - start + 360) : (end - start);
+    var w_s = (ws - start < 0) ? (360 + (ws - start)) : (ws - start);
+    var w_e = (we - start < 0) ? (360 + (we - start)) : (we - start);
+    var wedge_radius = (ws - we < 0) ? we - ws : ws - we;
+    if (wedge.dist > CATCHER.distance + LEEWAY) {
+        return (overlap);
+    }
+    else if (wedge.dist > CATCHER.distance) {
+        if (KEY_PRESSED !== 0 && CATCHER.colour == wedge.colour) {
+            hit = true;
+            if (w_s > w_e) {
+                overlap = Math.round((w_e / wedge_radius * 100));
             }
-            if (hit) {
-                var idx = wedges.indexOf(wedge);
-                wedges.splice(idx, 1);
+            else if (w_e > w_s && w_e < e) {
+                overlap = 100;
+            }
+            else {
+                overlap = Math.round((wedge_radius - (w_e - e)) /
+                    wedge_radius * 100);
             }
         }
-        else if (wedge.dist > CATCHER.radius + WEDGE_THICKNESS - LEEWAY) {
-            if (KEY_PRESSED !== 0 && CATCHER.colour == wedge.colour) {
-                hit = true;
-                if (w_s > w_e) {
-                    overlap = Math.round((w_e / wedge_radius * 100));
-                }
-                else if (w_e > w_s && w_e < e) {
-                    overlap = 100;
-                }
-                else {
-                    overlap = Math.round((wedge_radius - (w_e - e)) / wedge_radius * 100);
-                }
-            }
-            else if (KEY_PRESSED !== 0 && CATCHER.colour !== wedge.colour) {
-                hit = true;
-                overlap = -100;
-            }
-            if (hit) {
-                var idx = wedges.indexOf(wedge);
-                wedges.splice(idx, 1);
-            }
-        }
-        else {
-            overlap = -100;
+        if (hit) {
             var idx = wedges.indexOf(wedge);
             wedges.splice(idx, 1);
         }
-        return (overlap);
     }
+    else if (wedge.dist > CATCHER.distance - LEEWAY) {
+        if (KEY_PRESSED !== 0 && CATCHER.colour == wedge.colour) {
+            hit = true;
+            if (w_s > w_e) {
+                overlap = Math.round((w_e / wedge_radius * 100));
+            }
+            else if (w_e > w_s && w_e < e) {
+                overlap = 100;
+            }
+            else {
+                overlap = Math.round((wedge_radius - (w_e - e)) / wedge_radius * 100);
+            }
+        }
+        else if (KEY_PRESSED !== 0 && CATCHER.colour !== wedge.colour) {
+            hit = true;
+            overlap = -100;
+        }
+        if (hit) {
+            var idx = wedges.indexOf(wedge);
+            wedges.splice(idx, 1);
+        }
+    }
+    else {
+        overlap = -100;
+        var idx = wedges.indexOf(wedge);
+        console.log(idx);
+        wedges.splice(idx, 1);
+    }
+    return (overlap);
 }
 function keyDownHandler(e) {
     if (e.keyCode == 49) {
@@ -280,16 +285,16 @@ function draw_wedge(wedges) {
     var t = Math.PI * 2;
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
-    for (var _i = 0, wedges_2 = wedges; _i < wedges_2.length; _i++) {
-        var wedge = wedges_2[_i];
-        if (wedge.dist > RENDER_DIST) {
+    for (var _i = 0, wedges_1 = wedges; _i < wedges_1.length; _i++) {
+        var wedge = wedges_1[_i];
+        if (wedge.dist > CATCHER.distance + RENDER_DIST) {
             break;
         }
-        if (wedge.dist <= RENDER_DIST) {
+        else {
             var start = ((wedge.start / 360) * t) % t;
             var end = ((wedge.end / 360) * t) % t;
             ctx.beginPath();
-            ctx.arc(0, 0, wedge.dist, start, end, false);
+            ctx.arc(0, 0, wedge.dist - CATCHER.distance + CATCHER.radius, start, end, false);
             ctx.lineWidth = WEDGE_THICKNESS;
             ctx.strokeStyle = wedge.colour;
             ctx.stroke();
@@ -370,10 +375,12 @@ function mouseMoveHandler(e) {
     CATCHER.set_bearing((angle - w / 2) < 0 ? 360 + (angle - w / 2) : (angle - w / 2));
 }
 function update_wedges(wedges) {
-    for (var _i = 0, wedges_3 = wedges; _i < wedges_3.length; _i++) {
-        var wedge = wedges_3[_i];
+    /*
+    for (let wedge of wedges) {
         wedge.update(SPEED);
     }
+    */
+    CATCHER.distance += SPEED;
 }
 function update() {
     TICK_COUNT++;
