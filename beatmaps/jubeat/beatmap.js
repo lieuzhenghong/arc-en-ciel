@@ -1,4 +1,4 @@
-var DATA: string[] =  [
+var DATA = [
     'START 2.78',
     '0 60 1 400 0.42',
     '0 60 2 400 0.42',
